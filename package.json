@@ -4,7 +4,7 @@
   "version": "3.0.0",
   "description": "GESLO - Logiciel de gestion scolaire",
   "main": "main.js",
-  "author": "GESLO",
+  "author": "GESLO <geslo.flaaco@gmail.com>",
   "license": "UNLICENSED",
   "private": true,
   "scripts": {
@@ -32,7 +32,9 @@
       "output": "dist"
     },
     "win": {
-      "target": ["nsis"],
+      "target": [
+        "nsis"
+      ],
       "icon": "build/icon.ico"
     },
     "nsis": {
@@ -42,14 +44,20 @@
       "createStartMenuShortcut": true
     },
     "mac": {
-      "target": ["dmg"],
+      "target": [
+        "dmg"
+      ],
       "icon": "build/icon.icns",
       "category": "public.app-category.education"
     },
     "linux": {
-      "target": ["AppImage", "deb"],
+      "target": [
+        "AppImage",
+        "deb"
+      ],
       "icon": "build/icon.png",
       "category": "Education"
     }
-  }
+  },
+  "homepage": "https://geslo.app"
 }
