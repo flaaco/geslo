@@ -57,7 +57,8 @@
       ],
       "icon": "build/icon.png",
       "category": "Education"
-    }
+    },
+    "publish": null
   },
   "homepage": "https://geslo.app"
 }
