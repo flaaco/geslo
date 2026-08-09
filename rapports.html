@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Rapports & Bilans — CEPEED</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="app-shell">
+  <nav class="sidebar" id="sidebar"></nav>
+  <div class="main">
+    <header class="topbar" id="topbar"></header>
+    <main class="content">
+      <div class="content-header">
+        <h1 class="page-title">CENTRE DE RAPPORTS & BILANS</h1>
+        <p class="page-subtitle">Générez, imprimez et exportez les bilans financiers et administratifs</p>
+      </div>
+
+      <div class="grid grid-2-eq mb-16">
+        <div class="card">
+          <div class="card-title">Solde de Caisse Actuel</div>
+          <div class="stat-value" id="soldeCaisse">0 FCFA</div>
+          <div class="progress-bar"><span class="pb-green" style="width:70%"></span></div>
+          <a class="btn btn-outline btn-sm mt-16" href="report.html?type=Journal%20de%20Caisse" target="_blank">Voir Journal de Caisse</a>
+        </div>
+        <div class="card">
+          <div class="card-title">Dernier Rapport Généré</div>
+          <div style="font-weight:800;font-size:15px;margin-top:8px;" id="lastReportType">Aucun rapport</div>
+          <div class="small text-muted" id="lastReportDate">-</div>
+          <button class="btn btn-dark btn-sm mt-16" onclick="genererRapport()">Générer Nouveau</button>
+        </div>
+      </div>
+
+      <div class="grid grid-2">
+        <div class="card">
+          <div class="section-title">Générer un Rapport</div>
+          <div class="form-group"><label>Type de Rapport</label>
+            <select id="typeRapport">
+              <option>Journal de Caisse</option>
+              <option>Grand Livre</option>
+              <option selected>Situation Financière</option>
+              <option>État Débiteurs</option>
+              <option>Effectifs</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>Période</label><input type="date" id="periodeRapport"></div>
+            <div class="form-group"><label>Classe</label><select id="classeRapport"><option value="">Toutes les classes</option></select></div>
+          </div>
+          <div class="flex gap-8 flex-between" style="flex-wrap:wrap;">
+            <button class="btn btn-outline btn-sm" onclick="genererPDF()"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-save-icon lucide-save"><path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7"/><path d="M7 3v4a1 1 0 0 0 1 1h7"/></svg> Générer PDF</button>
+            <button class="btn btn-outline btn-sm" onclick="exporterExcel()"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-down-to-line-icon lucide-arrow-down-to-line"><path d="M12 17V3"/><path d="m6 11 6 6 6-6"/><path d="M19 21H5"/></svg> Exporter Excel (CSV)</button>
+            <button class="btn btn-outline btn-sm" onclick="planifierEnvoi()"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar-days-icon lucide-calendar-days"><path d="M8 2v3"/><path d="M16 2v3"/><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M8 13h.01"/><path d="M12 13h.01"/><path d="M16 13h.01"/><path d="M8 17h.01"/><path d="M12 17h.01"/><path d="M16 17h.01"/></svg> Planifier Envoi</button>
+          </div>
+          <div class="small text-muted mt-16" id="planStatus"></div>
+        </div>
+
+        <div class="card">
+          <div class="section-title">Historique des Rapports</div>
+          <div id="rapportsHistory"></div>
+        </div>
+      </div>
+
+      <div class="grid grid-3 mt-16">
+        <div class="card stat-card">
+          <div class="card-title">Élèves à Jour</div>
+          <div class="stat-value" style="color:var(--green);" id="statAJour">0</div>
+        </div>
+        <div class="card stat-card">
+          <div class="card-title">Élèves en Acompte</div>
+          <div class="stat-value" style="color:var(--orange);" id="statAcompte">0</div>
+        </div>
+        <div class="card stat-card">
+          <div class="card-title">Élèves Non Payés</div>
+          <div class="stat-value" style="color:var(--red);" id="statNonPaye">0</div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<script src="js/data.js"></script>
+<script src="js/sidebar.js"></script>
+<script src="js/rapports.js"></script>
+</body>
+</html>

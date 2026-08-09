@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Paramètres — CEPEED</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="app-shell">
+  <nav class="sidebar" id="sidebar"></nav>
+  <div class="main">
+    <header class="topbar" id="topbar"></header>
+    <main class="content">
+      <div class="content-header">
+        <h1 class="page-title">CONFIGURATION SYSTÈME</h1>
+        <p class="page-subtitle">Établissement, frais, modes de paiement, sécurité et alertes</p>
+      </div>
+
+      <div class="grid grid-2">
+        <div class="card">
+          <div class="tabs" id="settingsTabs">
+            <div class="tab active" data-panel="general">Général</div>
+            <div class="tab" data-panel="finances">Finances & Frais</div>
+            <div class="tab" data-panel="securite">Sécurité</div>
+            <div class="tab" data-panel="notifications">Notifications</div>
+          </div>
+
+          <div id="panel-general">
+            <div class="form-group">
+              <label>Logo de l'Établissement</label>
+              <div class="photo-upload-wrap">
+                <label class="photo-upload logo-upload" id="logoBox">
+                  <span id="logoInner"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-image-icon lucide-image"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg></span>
+                  <div class="photo-upload-overlay"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-image-up-icon lucide-image-up"><path d="M10.3 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10l-3.1-3.1a2 2 0 0 0-2.814.014L6 21"/><path d="m14 19.5 3-3 3 3"/><path d="M17 22v-5.5"/><circle cx="9" cy="9" r="2"/></svg> Choisir<br>un logo</div>
+                  <input type="file" accept="image/*" onchange="choisirLogo(this)">
+                </label>
+                <span class="photo-upload-remove" id="logoRemove" style="display:none;" onclick="retirerLogo(event)" title="Retirer le logo">✕</span>
+              </div>
+              <p class="small text-muted mt-8">Optionnel — apparaîtra automatiquement sur le bulletin, le reçu, le certificat, la fiche de paie, la fiche élève et les rapports. PNG avec fond transparent recommandé.</p>
+            </div>
+            <div class="form-group"><label>Nom de l'Établissement</label><input type="text" id="sEtablissement"></div>
+            <div class="form-group"><label>Année Scolaire</label><input type="text" id="sAnnee" placeholder="2025-2026"></div>
+            <div class="form-group"><label>Adresse</label><input type="text" id="sAdresse" placeholder="Pointe-Noire / Mbota-Carlos"></div>
+          </div>
+
+          <div id="panel-finances" style="display:none;">
+            <div class="section-title">Structure des Frais</div>
+            <div id="settingsFees"></div>
+            <p class="small text-muted mt-8">Pour ajouter ou supprimer un type de frais, rendez-vous dans <a class="link-btn" href="frais.html">Gestion Financière → Frais</a>.</p>
+
+            <div class="section-title mt-16">Modes de Paiement Acceptés</div>
+            <div class="form-row">
+              <label class="checkbox-row"><input type="checkbox" id="mEspeces">Espèces</label>
+              <label class="checkbox-row"><input type="checkbox" id="mMomo">MTN MoMo</label>
+              <label class="checkbox-row"><input type="checkbox" id="mOrange">Orange Money</label>
+              <label class="checkbox-row"><input type="checkbox" id="mCheque">Chèque</label>
+            </div>
+            <label class="checkbox-row"><input type="checkbox" id="mVirement">Virement</label>
+
+            <div class="section-title mt-16">Seuils d'Alerte</div>
+            <div class="form-row">
+              <div class="form-group"><label>Reste à payer — min (FCFA)</label><input type="number" id="seuilMin"></div>
+              <div class="form-group"><label>Reste à payer — max (FCFA)</label><input type="number" id="seuilMax"></div>
+            </div>
+
+            <div class="section-title mt-16">Plan Comptable SYSCOHADA</div>
+            <a class="link-btn" style="display:block;" href="#" onclick="toast('📘 Plan comptable SYSCOHADA — module à venir')">Consulter le plan comptable SYSCOHADA</a>
+          </div>
+
+          <div id="panel-securite" style="display:none;">
+            <div class="form-group"><label>Mot de passe actuel</label><input type="password" placeholder="••••••••"></div>
+            <div class="form-group"><label>Nouveau mot de passe</label><input type="password" placeholder="••••••••"></div>
+            <button class="btn btn-outline" onclick="toast('✔ Mot de passe mis à jour')">Changer le mot de passe</button>
+            <div class="divider"></div>
+            <label class="checkbox-row"><input type="checkbox" id="s2FA"> Activer l'authentification à deux facteurs</label>
+          </div>
+
+          <div id="panel-notifications" style="display:none;">
+            <label class="checkbox-row"><input type="checkbox" id="notifDebiteurs" checked> Alerter sur les nouveaux débiteurs</label>
+            <label class="checkbox-row"><input type="checkbox" id="notifEcheances" checked> Alerter avant les échéances</label>
+            <label class="checkbox-row"><input type="checkbox" id="notifPaie" checked> Alerter lors de la génération de la paie</label>
+            <div class="divider"></div>
+            <label class="checkbox-row"><input type="checkbox" id="sonsActifs" checked> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-activity-icon lucide-activity"><path d="M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2"/></svg> Activer les sons (alerte débiteurs + notifications d'activité)</label>
+            <button class="btn btn-outline btn-sm mt-8" onclick="testerSons()">▶ Tester les sons</button>
+          </div>
+
+          <button class="btn btn-primary btn-block mt-16" onclick="saveSettings()"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-save-icon lucide-save"><path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7"/><path d="M7 3v4a1 1 0 0 0 1 1h7"/></svg> Sauvegarder les modifications</button>
+        </div>
+
+        <div class="card">
+          <div class="section-title">Aperçu</div>
+          <p class="small text-muted">Ces paramètres s'appliquent à l'ensemble du logiciel : structure des frais disponible lors des encaissements, modes de paiement proposés, et seuils utilisés pour générer les alertes affichées dans le tableau de bord et la cloche de notifications.</p>
+          <div class="divider"></div>
+          <div class="section-title">Transfert des Données (vers une autre machine)</div>
+          <p class="small text-muted mb-16">Exportez toutes les données du logiciel dans un seul fichier, puis importez ce fichier sur un autre poste pour retrouver exactement les mêmes données (élèves, paiements, RH, notes, documents, paramètres...).</p>
+          <button class="btn btn-primary btn-block mb-8" onclick="exporterSauvegarde()">⬇ Exporter Toutes les Données (1 fichier)</button>
+          <label class="btn btn-outline btn-block" style="cursor:pointer;display:flex;justify-content:center;">
+            ⬆ Importer des Données depuis un Fichier
+            <input type="file" accept=".json,application/json" style="display:none;" id="importFileInput" onchange="importerSauvegarde(this)">
+          </label>
+          <p class="small text-muted mt-8" id="lastExportInfo"></p>
+          <div class="divider"></div>
+          <div class="section-title" style="color:var(--red);">Zone de Danger</div>
+          <p class="small text-muted mb-16">Efface définitivement toutes les données actuellement enregistrées sur cette machine (élèves, paiements, personnel, etc.) pour repartir sur une base totalement vierge.</p>
+          <button class="btn btn-danger btn-block" onclick="reinitialiserDonnees()"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash-icon lucide-trash"><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg> Effacer Toutes les Données (Réinitialiser)</button>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<div class="modal-overlay" id="importModal">
+  <div class="modal">
+    <div class="modal-head"><h3>Confirmer l'Importation</h3><span class="modal-close" onclick="closeImportModal()">✕</span></div>
+    <p class="small" style="color:var(--red);font-weight:700;">⚠ Cette action remplace TOUTES les données actuelles de ce logiciel par celles du fichier importé. Cette opération est irréversible.</p>
+    <div id="importSummary" class="small mb-16"></div>
+    <div class="flex gap-8">
+      <button class="btn btn-outline" onclick="closeImportModal()">Annuler</button>
+      <button class="btn btn-danger" onclick="confirmerImport()">🗑 Remplacer et Importer</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/data.js"></script>
+<script src="js/sidebar.js"></script>
+<script src="js/parametres.js"></script>
+</body>
+</html>

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>RH — Personnel Administratif — CEPEED</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="app-shell">
+  <nav class="sidebar" id="sidebar"></nav>
+  <div class="main">
+    <header class="topbar" id="topbar"></header>
+    <main class="content">
+      <div class="content-header flex-between">
+        <div>
+          <h1 class="page-title">RESSOURCES HUMAINES — PERSONNEL ADMINISTRATIF</h1>
+          <p class="page-subtitle">DG, DE, Comptables, Surveillants et autres membres à salaire fixe</p>
+        </div>
+        <button class="btn btn-primary" onclick="openStaffModal()">+ Nouveau Membre</button>
+      </div>
+
+      <div class="grid grid-4 mb-16">
+        <div class="card stat-card">
+          <div class="card-title">Personnel Administratif</div>
+          <div class="stat-value" id="statCount">0</div>
+          <div class="stat-icon icon-blue"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-icon lucide-user"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+        </div>
+        <div class="card stat-card">
+          <div class="card-title">Masse Salariale Mensuelle</div>
+          <div class="stat-value" id="statMasse" style="font-size:22px;">0 FCFA</div>
+          <div class="stat-icon icon-green"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-wallet-icon lucide-wallet"><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/></svg></div>
+        </div>
+        <div class="card stat-card">
+          <div class="card-title">Bulletins Générés (ce mois)</div>
+          <div class="stat-value" id="statBulletins">0</div>
+          <div class="stat-icon icon-orange"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-scroll-text-icon lucide-scroll-text"><path d="M15 12h-5"/><path d="M15 8h-5"/><path d="M19 17V5a2 2 0 0 0-2-2H4"/><path d="M8 21h12a2 2 0 0 0 2-2v-1a1 1 0 0 0-1-1H11a1 1 0 0 0-1 1v1a2 2 0 1 1-4 0V5a2 2 0 1 0-4 0v2a1 1 0 0 0 1 1h3"/></svg></div>
+        </div>
+        <div class="card stat-card">
+          <div class="card-title">Statut Paie du Mois</div>
+          <div class="stat-value" id="statPaieStatus" style="font-size:18px;">Non traitée</div>
+          <div class="stat-icon icon-gray"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-clock-fading-icon lucide-clock-fading"><path d="M12 2a10 10 0 0 1 7.38 16.75"/><path d="M12 6v6l4 2"/><path d="M2.5 8.875a10 10 0 0 0-.5 3"/><path d="M2.83 16a10 10 0 0 0 2.43 3.4"/><path d="M4.636 5.235a10 10 0 0 1 .891-.857"/><path d="M8.644 21.42a10 10 0 0 0 7.631-.38"/></svg></div>
+        </div>
+      </div>
+
+      <div class="card mb-16">
+        <div class="flex-between mb-16">
+          <div class="section-title" style="margin:0;">Liste du Personnel Administratif</div>
+          <button class="btn btn-dark btn-sm" onclick="genererPaieMois()"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-play-icon lucide-play"><path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"/></svg> Générer la Paie du Mois</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Matricule</th><th>Nom</th><th>Poste</th><th>Service</th><th>Date d'Embauche</th><th>Salaire Fixe</th><th>Mode de Paiement</th><th>Statut</th><th>Actions</th></tr></thead>
+            <tbody id="staffBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="section-title">Historique des Bulletins de Paie</div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Mois</th><th>Nom</th><th>Poste</th><th>Salaire Net</th><th>Date de Paiement</th><th>Actions</th></tr></thead>
+            <tbody id="payrollBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<div class="modal-overlay" id="staffModal">
+  <div class="modal">
+    <div class="modal-head"><h3>Nouveau Membre du Personnel</h3><span class="modal-close" onclick="closeStaffModal()">✕</span></div>
+    <div class="form-row">
+      <div class="form-group"><label>Nom</label><input type="text" id="mNom"></div>
+      <div class="form-group"><label>Prénom</label><input type="text" id="mPrenom"></div>
+    </div>
+    <div class="form-group"><label>Poste</label>
+      <select id="mPoste">
+        <option>Directeur Général (DG)</option>
+        <option>Directrice/Directeur des Études (DE)</option>
+        <option>Comptable</option>
+        <option>Surveillant Général</option>
+        <option>Secrétaire</option>
+        <option>Agent d'Entretien</option>
+        <option>Autre</option>
+      </select>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Service</label><input type="text" id="mService" placeholder="Direction, Finance, ..."></div>
+      <div class="form-group"><label>Date d'Embauche</label><input type="date" id="mDateEmbauche"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Salaire Fixe (FCFA)</label><input type="number" id="mSalaire"></div>
+      <div class="form-group"><label>Mode de Paiement</label>
+        <select id="mMode"><option>Virement</option><option>Espèces</option><option>MTN MoMo</option><option>Orange Money</option></select>
+      </div>
+    </div>
+    <div class="form-group"><label>Téléphone</label><input type="tel" id="mTel"></div>
+    <button class="btn btn-primary btn-block" onclick="saveStaff()">Enregistrer</button>
+  </div>
+</div>
+
+<script src="js/data.js"></script>
+<script src="js/sidebar.js"></script>
+<script src="js/rh-admin.js"></script>
+</body>
+</html>

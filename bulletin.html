@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Bulletin Scolaire — CEPEED</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="css/style.css">
+<style>body{background:var(--bg);}</style>
+</head>
+<body>
+  <div class="doc-toolbar no-print" style="max-width:1020px;justify-content:space-between;">
+    <div class="flex gap-8">
+      <a class="btn btn-outline" href="parcours.html">← Retour</a>
+      <select id="eleveSelect" onchange="loadBulletin(this.value)"></select>
+      <select id="semestreSelect" onchange="renderBulletin()">
+        <option value="1">1er Semestre uniquement</option>
+        <option value="2">2nd Semestre uniquement</option>
+        <option value="both" selected>Année complète (les 2 semestres)</option>
+      </select>
+    </div>
+    <div class="flex gap-8">
+      <button class="btn btn-outline" id="editModeBtn" onclick="toggleEditMode()">✏️ Mode Édition</button>
+      <button class="btn btn-outline" onclick="saveNotes()">💾 Enregistrer les Notes</button>
+      <button class="btn btn-primary" onclick="window.print()">🖨 Imprimer le Bulletin</button>
+    </div>
+  </div>
+
+  <div class="doc-page doc-page-wide" id="bulletinPage"></div>
+
+<script src="js/data.js"></script>
+<script src="js/bulletin.js"></script>
+</body>
+</html>

@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Tableau de bord — CEPEED</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="app-shell">
+  <nav class="sidebar" id="sidebar"></nav>
+  <div class="main">
+    <header class="topbar" id="topbar"></header>
+    <main class="content">
+      <div class="content-header flex-between">
+        <div>
+          <h1 class="page-title" id="dashTitle">TABLEAU DE BORD</h1>
+          <p class="page-subtitle" id="dashSubtitle">Vue globale — CEPEED School International</p>
+        </div>
+        <span class="chart-live-dot">Données en direct</span>
+      </div>
+
+      <div class="grid grid-4 mb-16">
+        <div class="card stat-card">
+          <div class="card-title">Élèves Inscrits</div>
+          <div class="stat-value" id="statEleves">0</div>
+          <div class="stat-icon icon-green"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-icon lucide-user"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+          <div class="progress-bar"><span class="pb-green" style="width:70%"></span></div>
+        </div>
+        <div class="card stat-card">
+          <div class="card-title">Recettes du Mois</div>
+          <div class="stat-value" id="statRecettes">0 FCFA</div>
+          <div class="stat-icon icon-blue"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-wallet-icon lucide-wallet"><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/></svg></div>
+          <div class="progress-bar"><span class="pb-blue" style="width:55%"></span></div>
+        </div>
+        <div class="card stat-card">
+          <div class="card-title">Élèves Débiteurs</div>
+          <div class="stat-value" id="statDebiteurs">0</div>
+          <div class="stat-icon icon-orange"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-triangle-alert-icon lucide-triangle-alert"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg></div>
+          <div class="progress-bar"><span class="pb-orange" style="width:40%"></span></div>
+        </div>
+        <div class="card stat-card">
+          <div class="card-title">Notifications SMS</div>
+          <div class="stat-value" id="statSms">0 <span style="font-size:14px;font-weight:600;color:var(--text-muted)">envoyées</span></div>
+          <div class="stat-icon icon-gray"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-message-circle-more-icon lucide-message-circle-more"><path d="M2.992 16.342a2 2 0 0 1 .094 1.167l-1.065 3.29a1 1 0 0 0 1.236 1.168l3.413-.998a2 2 0 0 1 1.099.092 10 10 0 1 0-4.777-4.719"/><path d="M8 12h.01"/><path d="M12 12h.01"/><path d="M16 12h.01"/></svg></div>
+          <div class="progress-bar"><span class="pb-blue" style="width:80%;background:#c9cede"></span></div>
+        </div>
+      </div>
+
+      <div class="grid grid-2">
+        <div class="card chart-card">
+          <div class="chart-card-head">
+            <div>
+              <div class="chart-card-title">Encaissements Mensuels</div>
+              <div class="chart-card-sub">Total encaissé par mois (FCFA), 6 derniers mois</div>
+            </div>
+          </div>
+          <div class="chart-box chart-box-tall"><canvas id="chartEncaissements"></canvas></div>
+
+          <div class="grid grid-2-eq mt-16">
+            <div class="chart-card">
+              <div class="chart-card-title mb-8">Répartition des Paiements</div>
+              <div class="chart-donut-wrap">
+                <div class="chart-donut-canvas"><canvas id="chartRepartition"></canvas></div>
+                <div class="chart-legend" id="legendRepartition"></div>
+              </div>
+            </div>
+            <div class="chart-card">
+              <div class="chart-card-title mb-8">Couverture des Dépenses</div>
+              <div class="gauge-box"><canvas id="chartCouverture"></canvas></div>
+              <p class="small text-muted" id="couvertureNote" style="text-align:center;margin-top:-4px;"></p>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title" style="margin-bottom:10px;">Activités Récentes</div>
+          <div id="activityList"></div>
+        </div>
+      </div>
+
+      <div class="grid grid-2 mt-16">
+        <div class="card chart-card">
+          <div class="chart-card-title mb-8">Effectifs par Classe</div>
+          <div class="chart-box" id="boxEffectifs" style="height:auto;"><canvas id="chartEffectifs"></canvas></div>
+        </div>
+        <div class="card chart-card">
+          <div class="chart-card-title mb-8">Montant Dû par Classe</div>
+          <div class="chart-box" id="boxDus" style="height:auto;"><canvas id="chartDus"></canvas></div>
+        </div>
+      </div>
+
+      <div class="card mt-16">
+        <div class="alert-box mb-16" id="alertHeader">
+          <div class="alert-box-title"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-triangle-alert-icon lucide-triangle-alert"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>ALERTES PAIEMENT EN RETARD</div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Photo</th><th>Matricule</th><th>Nom</th><th>Type Frais</th><th>Échéance</th><th>Reste à Payer</th><th>Actions</th></tr></thead>
+            <tbody id="debtorsBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<script src="js/data.js"></script>
+<script src="js/sidebar.js"></script>
+<script src="js/charts.js"></script>
+<script src="js/dashboard.js"></script>
+</body>
+</html>

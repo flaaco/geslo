@@ -1,0 +1,55 @@
+{
+  "name": "geslo",
+  "productName": "GESLO",
+  "version": "3.0.0",
+  "description": "GESLO - Logiciel de gestion scolaire",
+  "main": "main.js",
+  "author": "GESLO",
+  "license": "UNLICENSED",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "dist:win": "electron-builder --win",
+    "dist:linux": "electron-builder --linux",
+    "dist:mac": "electron-builder --mac",
+    "dist:all": "electron-builder -mwl"
+  },
+  "devDependencies": {
+    "electron": "^31.0.0",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "com.geslo.app",
+    "productName": "GESLO",
+    "files": [
+      "**/*",
+      "!node_modules",
+      "!dist",
+      "!*.zip",
+      "!sql/**"
+    ],
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": ["nsis"],
+      "icon": "build/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    },
+    "mac": {
+      "target": ["dmg"],
+      "icon": "build/icon.icns",
+      "category": "public.app-category.education"
+    },
+    "linux": {
+      "target": ["AppImage", "deb"],
+      "icon": "build/icon.png",
+      "category": "Education"
+    }
+  }
+}
