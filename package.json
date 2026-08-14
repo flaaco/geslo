@@ -4,7 +4,10 @@
   "version": "3.0.0",
   "description": "GESLO - Logiciel de gestion scolaire",
   "main": "main.js",
-  "author": "GESLO",
+  "author": {
+  "name": "GESLO",
+  "email": "geslo.flaaco@gmail.com"
+  },
   "license": "UNLICENSED",
   "private": true,
   "scripts": {
