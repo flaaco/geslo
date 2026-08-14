@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Activation — CEPEED</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="css/style.css">
+<style>
+  body{background:var(--navy-900);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;}
+  .activation-box{background:#fff;border-radius:14px;max-width:440px;width:100%;padding:36px 32px;box-shadow:0 20px 60px rgba(0,0,0,.35);}
+  .activation-logo{display:flex;align-items:center;gap:10px;justify-content:center;margin-bottom:6px;}
+  .activation-logo .logo-icon{width:40px;height:40px;border-radius:10px;background:var(--blue-accent);display:flex;align-items:center;justify-content:center;font-size:20px;color:#fff;}
+  .activation-logo span{font-weight:800;font-size:24px;color:var(--navy-900);letter-spacing:.5px;}
+  .activation-sub{text-align:center;color:var(--text-muted);font-size:13px;margin-bottom:26px;}
+  #keyInput{text-align:center;letter-spacing:2px;font-weight:700;font-size:16px;text-transform:uppercase;}
+  .activation-msg{font-size:12.5px;border-radius:8px;padding:10px 12px;margin-top:14px;display:none;}
+  .activation-msg.error{display:block;background:var(--red-bg);color:var(--red);}
+  .activation-msg.success{display:block;background:var(--green-bg);color:var(--green);}
+  .activation-msg.info{display:block;background:var(--blue-light);color:var(--blue-accent);}
+  .machine-id{font-size:11px;color:var(--text-muted);text-align:center;margin-top:20px;word-break:break-all;}
+</style>
+</head>
+<body>
+  <div class="activation-box">
+    <div class="activation-logo"><div class="logo-icon"><img src="img/logo.png" alt="GESLO" class="logo-icon"></div><span>GESLO</span></div>
+    <div class="activation-sub">Activation du logiciel — une clé de licence est requise (connexion internet nécessaire une seule fois)</div>
+
+    <div class="form-group">
+      <label>Clé de Licence</label>
+      <input type="text" id="keyInput" placeholder="GESLO-XXXX-XXXX-XXXX" autocomplete="off">
+    </div>
+    <button class="btn btn-primary btn-block" id="activateBtn" onclick="activerLicence()"> Activer le Logiciel</button>
+
+    <div class="activation-msg info" id="activationMsg" style="cursor:pointer;" onclick="window.open('https://flaaco.com', '_blank', 'noopener')">
+     Vous n'avez pas de clé de licence ? Rendez-vous sur <b style="text-decoration:underline;">flaaco.com</b>
+    </div>
+    <p class="small text-muted" style="text-align:center;margin-top:14px;"><code></code></p>
+    <div class="machine-id" id="machineIdDisplay"></div>
+  </div>
+
+<script src="js/data.js"></script>
+<script src="js/license-config.js"></script>
+<script src="js/license.js"></script>
+</body>
+</html>

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Paiements — CEPEED</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="app-shell">
+  <nav class="sidebar" id="sidebar"></nav>
+  <div class="main">
+    <header class="topbar" id="topbar"></header>
+    <main class="content">
+      <div class="grid grid-2-eq">
+
+        <!-- ===== GAUCHE: PORTAIL / ÉCHÉANCES ===== -->
+        <div>
+          <h1 class="page-title mb-16">PORTAIL DE GESTION FINANCIÈRE</h1>
+          <div class="card mb-16">
+            <div class="alert-box mb-16">
+              <div class="alert-box-title"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg> TABLEAU DE BORD DES ÉCHÉANCES & ALERTES</div>
+            </div>
+            <select id="classeFilter" onchange="renderClasses()" style="margin-bottom:14px;">
+              <option value="">Toutes les classes</option>
+            </select>
+            <div id="classCards" class="grid grid-2-eq"></div>
+          </div>
+
+          <div class="card">
+            <div class="section-title">Summaire des alertes immédiats:</div>
+            <ul id="alertList" style="padding-left:18px;font-size:13px;line-height:1.9;"></ul>
+            <button class="btn btn-dark btn-block mt-8" onclick="genererRapportRetard()">📄 Générer Rapports de Retard</button>
+          </div>
+        </div>
+
+        <!-- ===== DROITE: RECHERCHE ÉLÈVE + RÉSUMÉ ===== -->
+        <div>
+          <h1 class="page-title mb-16">ENCAISSER UN PAIEMENT</h1>
+          <div class="card">
+            <div class="form-group" style="margin-bottom:8px;">
+              <label>Rechercher un élève (nom ou matricule)</label>
+              <div class="flex gap-8">
+                <input type="text" id="searchPayEleve" placeholder="Ex: Ngoma ou CPI-25-4801" oninput="filterEleve(this.value)" onkeydown="if(event.key==='Enter') lockEleve();">
+                <button class="btn btn-primary" onclick="lockEleve()">Ouvrir</button>
+              </div>
+              <div id="eleveResults" class="small mt-8"></div>
+            </div>
+
+            <div id="eleveSummaryBox"></div>
+            <div id="statsBox" class="grid grid-2-eq mt-16"></div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ===== FICHE COMPLÈTE DE L'ÉLÈVE (pleine largeur) ===== -->
+      <div id="ficheCompleteSection" class="mt-16"></div>
+
+    </main>
+  </div>
+</div>
+
+<script src="js/data.js"></script>
+<script src="js/sidebar.js"></script>
+<script src="js/paiements.js"></script>
+</body>
+</html>

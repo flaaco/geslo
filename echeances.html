@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Échéances — CEPEED</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="app-shell">
+  <nav class="sidebar" id="sidebar"></nav>
+  <div class="main">
+    <header class="topbar" id="topbar"></header>
+    <main class="content">
+      <div class="content-header flex-between">
+        <div>
+          <h1 class="page-title">ÉCHÉANCES DE PAIEMENT</h1>
+          <p class="page-subtitle">Suivi des dûs mensuels et retards par élève</p>
+        </div>
+        <button class="btn btn-primary" onclick="openEcheanceModal()"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus-icon lucide-plus"><path d="M5 12h14"/><path d="M12 5v14"/></svg> Nouvelle Échéance</button>
+      </div>
+
+      <div class="card">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Matricule</th><th>Élève</th><th>Classe</th><th>Type Frais</th><th>Mois</th><th>Échéance</th><th>Reste à Payer</th><th>Statut</th><th>Actions</th></tr></thead>
+            <tbody id="echeancesBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<div class="modal-overlay" id="echeanceModal">
+  <div class="modal">
+    <div class="modal-head"><h3>Nouvelle Échéance</h3><span class="modal-close" onclick="closeEcheanceModal()">✕</span></div>
+    <div class="form-group"><label>Élève</label><select id="eEleve"></select></div>
+    <div class="form-group"><label>Type de Frais</label><select id="eType"></select></div>
+    <div class="form-row">
+      <div class="form-group"><label>Mois Concerné</label><input type="month" id="eMois"></div>
+      <div class="form-group"><label>Date d'Échéance</label><input type="date" id="eDate"></div>
+    </div>
+    <div class="form-group"><label>Montant Dû (FCFA)</label><input type="number" id="eMontant"></div>
+    <button class="btn btn-primary btn-block" onclick="creerEcheance()">Créer l'Échéance</button>
+  </div>
+</div>
+
+<script src="js/data.js"></script>
+<script src="js/sidebar.js"></script>
+<script src="js/echeances.js"></script>
+</body>
+</html>

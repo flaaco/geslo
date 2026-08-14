@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Classe — CEPEED</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="app-shell">
+  <nav class="sidebar" id="sidebar"></nav>
+  <div class="main">
+    <header class="topbar" id="topbar"></header>
+    <main class="content">
+      <div class="content-header flex-between">
+        <div>
+          <h1 class="page-title" id="classeTitle">CLASSE</h1>
+          <p class="page-subtitle" id="classeSubtitle"></p>
+        </div>
+        <select id="classeSwitcher" onchange="location.href='classe.html?classe='+encodeURIComponent(this.value)"></select>
+      </div>
+
+      <div class="flex gap-8 mb-16">
+        <button class="btn btn-primary" onclick="telechargerElevesAJour()">⬇ Télécharger les Élèves à Jour (CSV, 1 fichier)</button>
+        <button class="btn btn-outline" onclick="telechargerToutLaClasse()">⬇ Télécharger Toute la Classe (CSV)</button>
+      </div>
+
+      <div class="grid grid-3 mb-16">
+        <div class="card stat-card">
+          <div class="card-title">✔ Payé</div>
+          <div class="stat-value" id="cntPaye" style="color:var(--green);">0</div>
+          <div class="stat-icon icon-green">✔</div>
+        </div>
+        <div class="card stat-card">
+          <div class="card-title">◐ Acompte (Partiel)</div>
+          <div class="stat-value" id="cntAcompte" style="color:var(--orange);">0</div>
+          <div class="stat-icon icon-orange">◐</div>
+        </div>
+        <div class="card stat-card">
+          <div class="card-title">✕ Non Payé</div>
+          <div class="stat-value" id="cntNonPaye" style="color:var(--red);">0</div>
+          <div class="stat-icon icon-orange" style="background:var(--red-bg);color:var(--red);">✕</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="flex-between mb-16">
+          <div class="section-title" style="margin:0;">Liste des Élèves — triés par statut de paiement</div>
+          <div class="flex gap-8">
+            <select id="sortDir">
+              <option value="asc">Payé → Non Payé</option>
+              <option value="desc">Non Payé → Payé</option>
+            </select>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Matricule</th><th>Nom</th><th>Statut</th><th>Total Dû</th><th>Mois de Retard</th><th>Actions</th></tr></thead>
+            <tbody id="classeBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<script src="js/data.js"></script>
+<script src="js/sidebar.js"></script>
+<script src="js/classe.js"></script>
+</body>
+</html>

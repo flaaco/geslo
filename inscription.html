@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Inscription & Dossier Élève — CEPEED</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="app-shell">
+  <nav class="sidebar" id="sidebar"></nav>
+  <div class="main">
+    <header class="topbar" id="topbar"></header>
+    <main class="content">
+      <div class="grid grid-2-eq">
+
+        <!-- ===== NOUVELLE INSCRIPTION ===== -->
+        <div>
+          <h1 class="page-title mb-16">NOUVELLE INSCRIPTION</h1>
+          <div class="card">
+            <div class="tabs" id="wizTabs">
+              <div class="tab active" data-step="1">1. Informations Personnelles</div>
+              <div class="tab" data-step="2">2. Parents / Tuteur</div>
+              <div class="tab" data-step="3">3. Documents</div>
+              <div class="tab" data-step="4">4. Affectation</div>
+            </div>
+
+            <div id="step1">
+              <div class="form-group">
+                <label>Matricule</label>
+                <div class="flex gap-8">
+                  <input type="text" id="fMatricule" placeholder="[Auto-généré]" readonly>
+                  <button class="btn btn-outline" onclick="genMatricule()">Générer Matricule</button>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group"><label>Nom</label><input type="text" id="fNom"></div>
+                <div class="form-group"><label>Postnom</label><input type="text" id="fPostnom"></div>
+              </div>
+              <div class="form-group"><label>Prénom</label><input type="text" id="fPrenom"></div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Sexe</label>
+                  <select id="fSexe"><option value="M">Masculin</option><option value="F">Féminin</option></select>
+                </div>
+                <div class="form-group"><label>Date de Naissance</label><input type="date" id="fNaissance"></div>
+              </div>
+              <div class="form-row">
+                <div class="form-group"><label>Lieu de Naissance</label><input type="text" id="fLieu"></div>
+                <div class="form-group"><label>Nationalité</label><input type="text" id="fNationalite" value="Congolaise"></div>
+              </div>
+              <div class="form-group">
+                <label>Photo de l'Élève</label>
+                <div class="photo-upload-wrap">
+                  <label class="photo-upload" id="newPhotoBox">
+                    <span id="newPhotoInner"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-icon lucide-user"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+                    <div class="photo-upload-overlay"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-image-up-icon lucide-image-up"><path d="M10.3 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10l-3.1-3.1a2 2 0 0 0-2.814.014L6 21"/><path d="m14 19.5 3-3 3 3"/><path d="M17 22v-5.5"/><circle cx="9" cy="9" r="2"/></svg> Choisir<br>une photo</div>
+                    <input type="file" accept="image/*" onchange="choisirNouvellePhoto(this)">
+                  </label>
+                  <span class="photo-upload-remove" id="newPhotoRemove" style="display:none;" onclick="retirerNouvellePhoto(event)" title="Retirer la photo">✕</span>
+                </div>
+                <p class="small text-muted mt-8">Optionnel — JPG/PNG, recadrée et compressée automatiquement.</p>
+              </div>
+              <div class="flex gap-8 mt-16">
+                <button class="btn btn-primary" onclick="wizardSuivant()">Suivant →</button>
+              </div>
+            </div>
+
+            <div id="step2" style="display:none;">
+              <div class="form-row">
+                <div class="form-group"><label>Nom du Père</label><input type="text" id="fPereNom"></div>
+                <div class="form-group"><label>Téléphone du Père</label><input type="text" id="fPereTel"></div>
+              </div>
+              <div class="form-row">
+                <div class="form-group"><label>Nom de la Mère</label><input type="text" id="fMereNom"></div>
+                <div class="form-group"><label>Téléphone de la Mère</label><input type="text" id="fMereTel"></div>
+              </div>
+              <div class="form-row">
+                <div class="form-group"><label>Tuteur (si différent des parents)</label><input type="text" id="fTuteurNom"></div>
+                <div class="form-group"><label>Téléphone du Tuteur</label><input type="text" id="fTuteurTel"></div>
+              </div>
+              <div class="form-group"><label>Adresse du Domicile</label><input type="text" id="fAdresse"></div>
+              <div class="flex gap-8 mt-16">
+                <button class="btn btn-outline" onclick="wizardPrecedent()">← Précédent</button>
+                <button class="btn btn-primary" onclick="wizardSuivant()">Suivant →</button>
+              </div>
+            </div>
+
+            <div id="step3" style="display:none;">
+              <p class="small text-muted mb-16">Ces documents seront rattachés au dossier de l'élève dès la validation de l'inscription (optionnel — vous pourrez aussi les ajouter plus tard depuis le Dossier Élève).</p>
+              <div class="grid grid-2-eq mb-16" id="wizDocTypesGrid"></div>
+              <div class="flex gap-8 mt-16">
+                <button class="btn btn-outline" onclick="wizardPrecedent()">← Précédent</button>
+                <button class="btn btn-primary" onclick="wizardSuivant()">Suivant →</button>
+              </div>
+            </div>
+
+            <div id="step4" style="display:none;">
+              <div class="form-group">
+                <label>Classe d'Affectation</label>
+                <select id="fClasse"></select>
+              </div>
+              <div class="form-row">
+                <div class="form-group"><label>Année Scolaire</label><input type="text" id="fAnneeScolaire"></div>
+                <div class="form-group"><label>Date d'Inscription</label><input type="date" id="fDateInscription"></div>
+              </div>
+              <div class="flex gap-8 mt-16">
+                <button class="btn btn-outline" onclick="wizardPrecedent()">← Précédent</button>
+                <button class="btn btn-primary" onclick="validerInscription()"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check-line-icon lucide-check-line"><path d="M20 4L9 15"/><path d="M21 19L3 19"/><path d="M9 15L4 10"/></svg> Valider l'Inscription</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== DOSSIER ÉLÈVE & ARCHIVES ===== -->
+        <div id="dossier">
+          <h1 class="page-title mb-16">DOSSIER ÉLÈVE & ARCHIVES</h1>
+          <div class="card mb-16">
+            <div class="flex gap-8">
+              <div class="topbar-search" style="max-width:none;flex:1;"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search-icon lucide-search"><path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/></svg><input id="searchEleve" placeholder="Recherche de élève" oninput="searchEleve(this.value)"></div>
+              <button class="btn btn-dark" onclick="imprimerFicheEleve()"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-save-icon lucide-save"><path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7"/><path d="M7 3v4a1 1 0 0 0 1 1h7"/></svg> Imprimer Fiche Élève</button>
+            </div>
+          </div>
+
+          <div class="card" id="dossierCard">
+            <!-- rempli par inscription.js -->
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+</div>
+
+<div class="modal-overlay" id="editEleveModal">
+  <div class="modal">
+    <div class="modal-head"><h3>Modifier l'Élève</h3><span class="modal-close" onclick="closeEditEleve()">✕</span></div>
+    <div class="form-group">
+      <label>Photo de l'Élève</label>
+      <div class="photo-upload-wrap">
+        <label class="photo-upload" id="editPhotoBox">
+          <span id="editPhotoInner">👤</span>
+          <div class="photo-upload-overlay">📷 Changer<br>la photo</div>
+          <input type="file" accept="image/*" onchange="choisirModifPhoto(this)">
+        </label>
+        <span class="photo-upload-remove" id="editPhotoRemove" style="display:none;" onclick="retirerModifPhoto(event)" title="Retirer la photo">✕</span>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Nom</label><input type="text" id="eNom"></div>
+      <div class="form-group"><label>Postnom</label><input type="text" id="ePostnom"></div>
+    </div>
+    <div class="form-group"><label>Prénom</label><input type="text" id="ePrenom"></div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Sexe</label>
+        <select id="eSexe"><option value="M">Masculin</option><option value="F">Féminin</option></select>
+      </div>
+      <div class="form-group"><label>Date de Naissance</label><input type="date" id="eNaissance"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Lieu de Naissance</label><input type="text" id="eLieu"></div>
+      <div class="form-group"><label>Nationalité</label><input type="text" id="eNationalite"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Classe</label>
+        <select id="eClasse"></select>
+      </div>
+      <div class="form-group">
+        <label>Statut</label>
+        <select id="eStatut"><option>Inscrit</option><option>Suspendu</option><option>Exclu</option><option>Transféré</option><option>Diplômé</option></select>
+      </div>
+    </div>
+    <button class="btn btn-primary btn-block" onclick="enregistrerModifEleve()">💾 Enregistrer les Modifications</button>
+  </div>
+</div>
+
+<script src="js/data.js"></script>
+<script src="js/sidebar.js"></script>
+<script src="js/inscription.js"></script>
+</body>
+</html>
