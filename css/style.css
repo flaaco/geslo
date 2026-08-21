@@ -317,6 +317,9 @@ input:focus,select:focus,textarea:focus{border-color:var(--blue-accent);}
   .no-print{display:none !important;}
   .doc-page{box-shadow:none;border:none;margin:0;max-width:100%;}
   .doc-input{background:transparent !important;}
+  /* Quand plusieurs .doc-page se suivent (ex: bulletins de toute une classe imprimés
+     d'un coup), chacune commence sur une nouvelle page. */
+  .doc-page + .doc-page{page-break-before:always;}
 }
 
 /* ============ GRAPHIQUES "PRO" (CepeedCharts) ============ */
