@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
       ${DB.docCrestHTML(settings)}
       <div class="doc-country">RÉPUBLIQUE DU CONGO</div>
       <div class="doc-meta" style="font-weight:700;">MINISTÈRE DE L'ENSEIGNEMENT PRIMAIRE, SECONDAIRE ET TECHNIQUE</div>
-      <div class="doc-org">${(settings.etablissement || 'CEPEED School International').toUpperCase()}</div>
+      <div class="doc-org">${(settings.etablissement || 'Établissement Scolaire').toUpperCase()}</div>
       <div class="doc-meta">${settings.adresse || 'Pointe-Noire / Mbota-Carlos'}</div>
     </div>
 
@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
     <div class="doc-field text-right">N° ${numero}</div>
 
     <div style="margin:28px 0;font-size:14px;line-height:2;text-align:justify;">
-      Je soussigné(e), Chef d'Établissement de <b>${(settings.etablissement || 'CEPEED School International')}</b>,
+      Je soussigné(e), Chef d'Établissement de <b>${(settings.etablissement || 'Établissement Scolaire')}</b>,
       certifie que l'élève :
     </div>
 

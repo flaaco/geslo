@@ -96,7 +96,7 @@ function saveTeacher(){
   }
 
   teachers.push({
-    id: DB.uid('CPI-PROF'), ...fields, statut:'Actif'
+    id: DB.uid(DB.matriculePrefix()+'-PROF'), ...fields, statut:'Actif'
   });
   DB.set(DB.KEYS.teachers, teachers);
   DB.logActivity('<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-icon lucide-user"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>\u200d<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-school-icon lucide-school"><path d="M14 21v-3a2 2 0 0 0-4 0v3"/><path d="M18 4.933V21"/><path d="m4 6 7.106-3.79a2 2 0 0 1 1.788 0L20 6"/><path d="m6 11-3.52 2.147a1 1 0 0 0-.48.854V19a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-5a1 1 0 0 0-.48-.853L18 11"/><path d="M6 4.933V21"/><circle cx="12" cy="9" r="2"/></svg>', `Ajout de l'enseignant ${nom} ${prenom}`);
@@ -153,8 +153,10 @@ function renderRecap(){
   document.getElementById('recapBody').innerHTML = teachers.length ? teachers.map(t=>{
     const heures = pointages.filter(p=>p.profId===t.id && p.date.startsWith(curMonth)).reduce((s,p)=>s+p.heures,0);
     const total = heures * t.tauxHoraire;
-    return `<tr><td>${t.prenom} ${t.nom}</td><td>${heures.toFixed(2)} h</td><td>${DB.fmtFCFA(t.tauxHoraire)}</td><td style="font-weight:700;">${DB.fmtFCFA(total)}</td></tr>`;
-  }).join('') : '<tr><td colspan="4" class="empty-state">Aucun enseignant actif</td></tr>';
+    const cantine = DB.totalConsommationCantine(t.id, curMonth);
+    const net = total - cantine;
+    return `<tr><td>${t.prenom} ${t.nom}</td><td>${heures.toFixed(2)} h</td><td>${DB.fmtFCFA(t.tauxHoraire)}</td><td>${DB.fmtFCFA(total)}</td><td style="color:var(--red);">${cantine>0?'- '+DB.fmtFCFA(cantine):'-'}</td><td style="font-weight:700;${net<0?'color:var(--red);':''}">${DB.fmtFCFA(net)}</td></tr>`;
+  }).join('') : '<tr><td colspan="6" class="empty-state">Aucun enseignant actif</td></tr>';
 }
 
 function renderStats(){
@@ -197,10 +199,13 @@ function genererPaieProfs(){
   teachers.forEach(t=>{
     const heures = pointages.filter(p=>p.profId===t.id && p.date.startsWith(curMonth)).reduce((s,p)=>s+p.heures,0);
     if(heures <= 0) return;
-    const salaireNet = Math.round(heures * t.tauxHoraire);
+    const salaireBrut = Math.round(heures * t.tauxHoraire);
+    const cantine = DB.totalConsommationCantine(t.id, curMonth);
+    const salaireNet = Math.max(0, salaireBrut - cantine);
     lignes.push({
       id: DB.uid('PAIE'), type:'enseignant', staffId: t.id, nom: `${t.prenom} ${t.nom}`,
-      poste: t.matiere, mois: curMonth, heures, salaireNet,
+      poste: t.matiere, mois: curMonth, heures, salaireBrutAvantCantine: salaireBrut,
+      cantineDeduite: cantine, salaireNet,
       datePaiement: new Date().toISOString().slice(0,10)
     });
     total += salaireNet;
@@ -209,6 +214,7 @@ function genererPaieProfs(){
 
   if(!count){ toast('<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-triangle-alert-icon lucide-triangle-alert"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg> Aucune heure pointée ce mois-ci'); return; }
 
+  const totalCantine = lignes.reduce((s,l)=>s+l.cantineDeduite,0);
   const soldeAvant = DB.soldeCaisse();
   if(total > soldeAvant){
     if(!confirm(`Le solde de caisse actuel (${DB.fmtFCFA(soldeAvant)}) est insuffisant pour couvrir la paie des enseignants (${DB.fmtFCFA(total)}).\n\nLa caisse passera en négatif (${DB.fmtFCFA(soldeAvant-total)}). Continuer quand même ?`)) return;
@@ -223,8 +229,8 @@ function genererPaieProfs(){
     montant: total, reference:'PAIE-PROF-'+curMonth
   });
 
-  DB.logActivity('<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-hand-coins-icon lucide-hand-coins"><path d="M11 15h2a2 2 0 1 0 0-4h-3c-.6 0-1.1.2-1.4.6L3 17"/><path d="m7 21 1.6-1.4c.3-.4.8-.6 1.4-.6h4c1.1 0 2.1-.4 2.8-1.2l4.6-4.4a2 2 0 0 0-2.75-2.91l-4.2 3.9"/><path d="m2 16 6 6"/><circle cx="16" cy="9" r="2.9"/><circle cx="6" cy="5" r="3"/></svg>', `Génération de la paie des enseignants pour ${curMonth} — ${DB.fmtFCFA(total)} débités de la caisse`);
-  toast(`✔ Paie générée pour ${count} enseignant(s) — ${DB.fmtFCFA(total)} débités. Nouveau solde : ${DB.fmtFCFA(DB.soldeCaisse())}`);
+  DB.logActivity('<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-hand-coins-icon lucide-hand-coins"><path d="M11 15h2a2 2 0 1 0 0-4h-3c-.6 0-1.1.2-1.4.6L3 17"/><path d="m7 21 1.6-1.4c.3-.4.8-.6 1.4-.6h4c1.1 0 2.1-.4 2.8-1.2l4.6-4.4a2 2 0 0 0-2.75-2.91l-4.2 3.9"/><path d="m2 16 6 6"/><circle cx="16" cy="9" r="2.9"/><circle cx="6" cy="5" r="3"/></svg>', `Génération de la paie des enseignants pour ${curMonth} — ${DB.fmtFCFA(total)} débités de la caisse${totalCantine>0 ? ` (dont ${DB.fmtFCFA(totalCantine)} déjà déduits pour consommation cantine)` : ''}`);
+  toast(`✔ Paie générée pour ${count} enseignant(s) — ${DB.fmtFCFA(total)} débités${totalCantine>0 ? ` (cantine déduite : ${DB.fmtFCFA(totalCantine)})` : ''}. Nouveau solde : ${DB.fmtFCFA(DB.soldeCaisse())}`);
   renderAll();
 }
 
@@ -233,7 +239,8 @@ function renderPayrollProf(){
   document.getElementById('payrollProfBody').innerHTML = payroll.length ? payroll.slice().reverse().map(p=>`
     <tr>
       <td>${p.mois}</td><td>${p.nom}</td><td>${p.heures.toFixed(2)} h</td>
+      <td>${p.cantineDeduite ? '- '+DB.fmtFCFA(p.cantineDeduite) : '-'}</td>
       <td style="font-weight:700;">${DB.fmtFCFA(p.salaireNet)}</td><td>${p.datePaiement}</td>
       <td><button class="btn btn-outline btn-sm" onclick="window.open('paie.html?paie=${p.id}','_blank')"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-save-icon lucide-save"><path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7"/><path d="M7 3v4a1 1 0 0 0 1 1h7"/></svg> Bulletin</button></td>
-    </tr>`).join('') : '<tr><td colspan="6" class="empty-state">Aucun bulletin généré</td></tr>';
+    </tr>`).join('') : '<tr><td colspan="7" class="empty-state">Aucun bulletin généré</td></tr>';
 }

@@ -44,7 +44,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
     <div class="doc-head">
       ${DB.docCrestHTML(settings)}
       <div class="doc-country">RÉPUBLIQUE DU CONGO</div>
-      <div class="doc-org">${(settings.etablissement || 'CEPEED School International').toUpperCase()}</div>
+      <div class="doc-org">${(settings.etablissement || 'Établissement Scolaire').toUpperCase()}</div>
       <div class="doc-meta">Pointe-Noire / Mbota-Carlos</div>
     </div>
 

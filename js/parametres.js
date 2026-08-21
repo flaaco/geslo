@@ -185,7 +185,7 @@ function importerSauvegarde(input){
     // accepte le format d'export CEPEED (avec enveloppe) ou un ancien export brut (clés directes)
     const data = (parsed && parsed.__cepeed_export__) ? parsed.data : parsed;
     if(!data || typeof data !== 'object'){
-      toast('⚠ Ce fichier ne contient pas de données CEPEED reconnaissables');
+      toast('⚠ Ce fichier ne contient pas de données reconnaissables');
       input.value = '';
       return;
     }
@@ -193,7 +193,7 @@ function importerSauvegarde(input){
     const knownKeys = Object.values(DB.KEYS);
     const foundKeys = Object.keys(data).filter(k => knownKeys.includes(k));
     if(!foundKeys.length){
-      toast('⚠ Ce fichier ne contient aucune donnée CEPEED reconnaissable');
+      toast('⚠ Ce fichier ne contient aucune donnée reconnaissable');
       input.value = '';
       return;
     }

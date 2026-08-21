@@ -91,7 +91,7 @@ function telechargerElevesAJour(){
     rows.push([s.id, s.nom, s.prenom, s.classe, mois, totalPaye]);
   });
 
-  DB.downloadCSV(`CEPEED-${currentClasse.replace(/\s+/g,'_')}-eleves-a-jour-${new Date().toISOString().slice(0,10)}.csv`, rows);
+  DB.downloadCSV(`${DB.matriculePrefix()}-${currentClasse.replace(/\s+/g,'_')}-eleves-a-jour-${new Date().toISOString().slice(0,10)}.csv`, rows);
   DB.logActivity('⬇', `Export des élèves à jour de la classe ${currentClasse} (${aJour.length} élève(s))`);
   toast(`✔ ${aJour.length} élève(s) à jour exporté(s) dans un seul fichier`);
 }
@@ -109,7 +109,7 @@ function telechargerToutLaClasse(){
     rows.push([s.id, s.nom, s.prenom, s.classe, statusLabel[ps.status], mois, ps.totalDu]);
   });
 
-  DB.downloadCSV(`CEPEED-${currentClasse.replace(/\s+/g,'_')}-tous-les-eleves-${new Date().toISOString().slice(0,10)}.csv`, rows);
+  DB.downloadCSV(`${DB.matriculePrefix()}-${currentClasse.replace(/\s+/g,'_')}-tous-les-eleves-${new Date().toISOString().slice(0,10)}.csv`, rows);
   DB.logActivity('⬇', `Export complet de la classe ${currentClasse} (${students.length} élève(s))`);
   toast(`✔ ${students.length} élève(s) exporté(s) dans un seul fichier`);
 }

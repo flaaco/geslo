@@ -25,7 +25,7 @@ function renderDashboard(withEntryAnim){
 
   const monthLabel = now.toLocaleDateString('fr-FR', {month:'long', year:'numeric'}).toUpperCase();
   document.getElementById('dashTitle').textContent = 'TABLEAU DE BORD - ' + monthLabel;
-  document.getElementById('dashSubtitle').textContent = 'Vue globale — ' + (settings.etablissement || 'CEPEED School International');
+  document.getElementById('dashSubtitle').textContent = 'Vue globale — ' + (settings.etablissement || 'Établissement Scolaire');
 
   document.getElementById('statEleves').textContent = students.length.toLocaleString('fr-FR');
 

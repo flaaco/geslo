@@ -18,14 +18,17 @@ function creerCompte(){
   const nom = document.getElementById('cNom').value.trim();
   if(!nom){ alert('⚠ Veuillez indiquer votre nom'); return; }
 
+  const etablissement = document.getElementById('cEtablissement').value.trim();
+  if(!etablissement){ alert('⚠ Veuillez indiquer le nom de l\'établissement — il sera utilisé partout dans le logiciel (matricules, reçus, bulletins, rapports…)'); return; }
+
   const settings = DB.get(DB.KEYS.settings, {});
-  settings.etablissement = document.getElementById('cEtablissement').value.trim() || settings.etablissement;
+  settings.etablissement = etablissement;
   settings.annee = document.getElementById('cAnnee').value.trim() || settings.annee;
   DB.set(DB.KEYS.settings, settings);
 
   DB.set(DB.KEYS.session, {
     nom,
-    matricule: DB.uid('CPI-USR'),
+    matricule: DB.uid(DB.matriculePrefix()+'-USR'),
     role: document.getElementById('cRole').value,
     email: document.getElementById('cEmail').value.trim(),
     tel: document.getElementById('cTel').value.trim()

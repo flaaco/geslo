@@ -49,6 +49,25 @@ document.addEventListener('DOMContentLoaded', ()=>{
           ${list.map(r=>`<tr><td>${r.el.prenom} ${r.el.nom}</td><td>${r.el.id}</td><td>${r.el.classe}</td><td>${r.ps.status==='acompte'?'Acompte':'Non Payé'}</td><td class="num">${DB.fmtFCFA(r.ps.totalDu)}</td><td class="num">${r.ps.moisRetard}</td></tr>`).join('') || '<tr><td colspan="6" class="empty-state">Aucun débiteur <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-party-popper-icon lucide-party-popper"><path d="M5.8 11.3 2 22l10.7-3.79"/><path d="M4 3h.01"/><path d="M22 8h.01"/><path d="M15 2h.01"/><path d="M22 20h.01"/><path d="m22 2-2.24.75a2.9 2.9 0 0 0-1.96 3.12c.1.86-.57 1.63-1.45 1.63h-.38c-.86 0-1.6.6-1.76 1.44L14 10"/><path d="m22 13-.82-.33c-.86-.34-1.82.2-1.98 1.11c-.11.7-.72 1.22-1.43 1.22H17"/><path d="m11 2 .33.82c.34.86-.2 1.82-1.11 1.98C9.52 4.9 9 5.52 9 6.23V7"/><path d="M11 13c1.93 1.93 2.83 4.17 2 5-.83.83-3.07-.07-5-2-1.93-1.93-2.83-4.17-2-5 .83-.83 3.07.07 5 2Z"/></svg></td></tr>'}
         </tbody>
       </table>`;
+  } else if(type === 'Synthèse des Encaissements'){
+    const debut = params.get('debut') || '';
+    const fin = params.get('fin') || '';
+    const data = DB.encaissementsParType(debut, fin);
+    const rowsType = data.lignes.map(l=>`<tr><td>${l.type}</td><td class="num">${l.nb}</td><td class="num">${DB.fmtFCFA(l.montant)}</td></tr>`).join('')
+      || '<tr><td colspan="3" class="empty-state">Aucun encaissement sur cette période</td></tr>';
+    const rowsMode = data.modes.map(m=>`<tr><td>${m.mode}</td><td class="num">${DB.fmtFCFA(m.montant)}</td></tr>`).join('')
+      || '<tr><td colspan="2" class="empty-state">Aucun encaissement sur cette période</td></tr>';
+    body = `
+      <table class="doc-table">
+        <thead><tr><th>Type de Frais</th><th class="num">Nb Paiements</th><th class="num">Montant Encaissé</th></tr></thead>
+        <tbody>${rowsType}</tbody>
+        <tfoot><tr class="doc-total-row"><td>TOTAL (${data.nbPaiements} paiement(s))</td><td></td><td class="num">${DB.fmtFCFA(data.total)}</td></tr></tfoot>
+      </table>
+      <div class="section-title mt-16" style="font-size:13px;">Répartition par Mode de Paiement</div>
+      <table class="doc-table">
+        <thead><tr><th>Mode de Paiement</th><th class="num">Montant Encaissé</th></tr></thead>
+        <tbody>${rowsMode}</tbody>
+      </table>`;
   } else if(type === 'Effectifs'){
     const classes = [...new Set(students.map(s=>s.classe))];
     body = `
@@ -81,11 +100,11 @@ document.addEventListener('DOMContentLoaded', ()=>{
     <div class="doc-head">
       ${DB.docCrestHTML(settings)}
       <div class="doc-country">RÉPUBLIQUE DU CONGO</div>
-      <div class="doc-org">${(settings.etablissement || 'CEPEED School International').toUpperCase()}</div>
+      <div class="doc-org">${(settings.etablissement || 'Établissement Scolaire').toUpperCase()}</div>
       <div class="doc-meta">${settings.adresse || 'Pointe-Noire / Mbota-Carlos'}</div>
     </div>
     <div class="doc-title" style="font-size:16px;">${type.toUpperCase()}${classeFilter ? ' — '+classeFilter : ''}</div>
-    <div class="doc-field mb-16">Généré le ${new Date().toLocaleDateString('fr-FR')} à ${new Date().toLocaleTimeString('fr-FR')} — Année scolaire ${settings.annee || '2025-2026'}</div>
+    <div class="doc-field mb-16">${params.get('label') ? ('Période : ' + params.get('label') + ' — ') : ''}Généré le ${new Date().toLocaleDateString('fr-FR')} à ${new Date().toLocaleTimeString('fr-FR')} — Année scolaire ${settings.annee || '2025-2026'}</div>
     ${body}
     <div class="doc-sign">
       <div></div>

@@ -18,7 +18,7 @@ function loadParcours(id){
     return;
   }
 
-  document.getElementById('pNom').textContent = `${el.prenom} ${el.nom} (CEPEED-2026-${el.id.split('-').pop()})`;
+  document.getElementById('pNom').textContent = `${el.prenom} ${el.nom} (${el.id})`;
   document.getElementById('pClasse').textContent = `Classe: ${el.classe}`;
   document.getElementById('pStatut').textContent = el.statut;
   document.getElementById('pPhotoBox').innerHTML = DB.avatarHTML(el.photo, 64, '50%', 26);

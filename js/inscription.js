@@ -96,7 +96,7 @@ function retirerWizDoc(label){
 function genMatricule(){
   const year = new Date().getFullYear().toString().slice(-2);
   const num = 4800 + DB.get(DB.KEYS.students,[]).length + 1;
-  document.getElementById('fMatricule').value = `CPI-${year}-${num}`;
+  document.getElementById('fMatricule').value = `${DB.matriculePrefix()}-${year}-${num}`;
 }
 
 function validerInscription(){

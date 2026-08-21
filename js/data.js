@@ -24,7 +24,10 @@ const DB = {
     license:'cepeed_license',
     accountCreated:'cepeed_account_created',
     classes:'cepeed_classes',
-    caissiers:'cepeed_caissiers'
+    caissiers:'cepeed_caissiers',
+    cantineConso:'cepeed_cantine_conso',
+    matieresClasse:'cepeed_matieres_classe',
+    devoirNotes:'cepeed_devoir_notes'
   },
   CAISSIERS_DEFAUT: ['Marie','Alain','Sylvie'],
 
@@ -43,6 +46,18 @@ const DB = {
   },
   uid(prefix){
     return (prefix||'ID') + '-' + Date.now().toString(36).toUpperCase() + Math.floor(Math.random()*90+10);
+  },
+  /* Préfixe de matricule dérivé du nom de l'établissement (ex: "GESLO SCHOOL" -> "geslo",
+     "Flyer School" -> "flyer"). Utilisé pour TOUS les matricules générés : élèves,
+     enseignants, personnel administratif, comptes utilisateurs, etc. Se met à jour
+     automatiquement si le nom de l'établissement est modifié dans Paramètres — seuls les
+     NOUVEAUX matricules créés après le changement adoptent le nouveau préfixe. */
+  matriculePrefix(){
+    const settings = DB.get(DB.KEYS.settings, {});
+    const nom = (settings.etablissement || '').trim();
+    const premierMot = nom.split(/\s+/)[0] || '';
+    const propre = premierMot.replace(/[^A-Za-z0-9]/g, '').toLowerCase();
+    return propre || 'ecole';
   },
   /* Identifiant unique et persistant de CETTE machine/navigateur (généré une seule fois).
      Sert à lier une clé de licence à un seul poste. */
@@ -225,6 +240,34 @@ const DB = {
     const depenses = DB.get(DB.KEYS.depenses, []).reduce((s,d)=> s + (Number(d.montant)||0), 0);
     return recettes - depenses;
   },
+  /* Regroupe les ENCAISSEMENTS (tout l'argent qui rentre — paiements élèves) par type de
+     frais sur une période donnée (dateDebut/dateFin au format 'AAAA-MM-JJ', inclusifs).
+     S'appuie sur "items" de chaque paiement (un même paiement peut couvrir plusieurs types
+     à la fois, ex: Scolarité + Cantine réglés en une seule transaction), afin que le total
+     "Scolarité du jour" ou "Inscription du mois" soit exact même dans ce cas. */
+  encaissementsParType(dateDebut, dateFin){
+    const payments = DB.get(DB.KEYS.payments, []).filter(p=>{
+      const d = (p.date||'').slice(0,10);
+      return (!dateDebut || d >= dateDebut) && (!dateFin || d <= dateFin);
+    });
+    const parType = {}, parMode = {};
+    let total = 0;
+    payments.forEach(p=>{
+      const mode = p.mode || 'Non précisé';
+      parMode[mode] = (parMode[mode]||0) + (Number(p.montantPaye)||0);
+      const items = (p.items && p.items.length) ? p.items : [{type:p.type||'Divers', montant:p.montantPaye}];
+      items.forEach(it=>{
+        const type = it.type || 'Divers';
+        if(!parType[type]) parType[type] = {montant:0, nb:0};
+        parType[type].montant += Number(it.montant)||0;
+        parType[type].nb += 1;
+      });
+      total += Number(p.montantPaye)||0;
+    });
+    const lignes = Object.entries(parType).map(([type,v])=>({type, montant:v.montant, nb:v.nb})).sort((a,b)=>b.montant-a.montant);
+    const modes = Object.entries(parMode).map(([mode,montant])=>({mode, montant})).sort((a,b)=>b.montant-a.montant);
+    return {lignes, modes, total, nbPaiements: payments.length};
+  },
   /* Enregistre une sortie de caisse (dépense) et journalise l'activité correspondante */
   enregistrerDepense({categorie, libelle, montant, reference}){
     const depenses = DB.get(DB.KEYS.depenses, []);
@@ -235,6 +278,178 @@ const DB = {
     depenses.push(dep);
     DB.set(DB.KEYS.depenses, depenses);
     return dep;
+  },
+
+  /* ---------------- CANTINE DU PERSONNEL (montant libre, pas de tarif fixe) ----------------
+     Un enseignant ou un membre du personnel administratif peut manger à la cantine —
+     certains tous les jours, d'autres jamais — pour un montant qui varie à chaque fois.
+     Chaque repas est enregistré individuellement, puis vient en déduction de ce qui lui
+     est dû (heures pointées pour un enseignant, salaire fixe pour un administratif) au
+     moment de la génération de la paie du mois. */
+  enregistrerConsommationCantine({personId, personType, nom, montant, description, date}){
+    const conso = DB.get(DB.KEYS.cantineConso, []);
+    const rec = {
+      id: DB.uid('CANT'), personId, personType, nom,
+      montant: Math.round(Number(montant)||0),
+      description: (description || 'Repas').trim(),
+      date: date || new Date().toISOString().slice(0,10), horodatage: new Date().toISOString()
+    };
+    conso.push(rec);
+    DB.set(DB.KEYS.cantineConso, conso);
+    return rec;
+  },
+  /* Total consommé par une personne sur un mois donné ('AAAA-MM'), ou sur tout l'historique
+     si mois est omis. */
+  totalConsommationCantine(personId, mois){
+    return DB.get(DB.KEYS.cantineConso, [])
+      .filter(c => c.personId === personId && (!mois || c.date.startsWith(mois)))
+      .reduce((s,c)=> s + Number(c.montant||0), 0);
+  },
+  /* Ce qui est dû à un membre du personnel pour un mois donné, AVANT déduction de la
+     cantine : basé sur le pointage d'heures pour un enseignant, ou le salaire fixe pour
+     un membre du personnel administratif. */
+  duPersonnelAvantCantine(person, personType, mois){
+    if(personType === 'enseignant'){
+      const heures = DB.get(DB.KEYS.pointages, [])
+        .filter(p=>p.profId===person.id && p.date.startsWith(mois))
+        .reduce((s,p)=>s+p.heures,0);
+      return {heures, montant: Math.round(heures * (person.tauxHoraire||0))};
+    }
+    return {heures:null, montant: Number(person.salaireFixe||0)};
+  },
+
+  /* ---------------- MATIÈRES & COEFFICIENTS PAR CLASSE (Notes du DE) ----------------
+     Chaque classe a sa propre liste de matières, chacune avec un coefficient — modifiable
+     librement par le Directeur des Études (DE), sans toucher au code. */
+  matieresDeClasse(classe){
+    const table = DB.get(DB.KEYS.matieresClasse, {});
+    return table[classe] || [];
+  },
+  ajouterMatiereClasse(classe, nom, coefficient){
+    nom = (nom||'').trim();
+    if(!nom) return {success:false, message:'Nom de matière vide'};
+    const table = DB.get(DB.KEYS.matieresClasse, {});
+    if(!table[classe]) table[classe] = [];
+    if(table[classe].some(m=>m.nom.toLowerCase()===nom.toLowerCase())){
+      return {success:false, message:'Cette matière existe déjà dans cette classe'};
+    }
+    table[classe].push({id: DB.uid('MAT'), nom, coefficient: Math.max(1, Number(coefficient)||1)});
+    DB.set(DB.KEYS.matieresClasse, table);
+    return {success:true};
+  },
+  modifierCoefficientMatiere(classe, matiereId, coefficient){
+    const table = DB.get(DB.KEYS.matieresClasse, {});
+    const m = (table[classe]||[]).find(x=>x.id===matiereId);
+    if(m){ m.coefficient = Math.max(1, Number(coefficient)||1); DB.set(DB.KEYS.matieresClasse, table); }
+  },
+  supprimerMatiereClasse(classe, matiereId){
+    const table = DB.get(DB.KEYS.matieresClasse, {});
+    table[classe] = (table[classe]||[]).filter(m=>m.id!==matiereId);
+    DB.set(DB.KEYS.matieresClasse, table);
+    // Les notes déjà saisies pour cette matière restent en base (historique) mais ne
+    // compteront plus dans la moyenne générale puisque la matière n'existe plus pour la classe.
+  },
+
+  /* ---------------- NOTES DE DEVOIRS (Devoir de Classe / Devoir de Département / Composition) ----------------
+     Chaque enregistrement correspond à UN devoir précis (matière + type + date) pour UN
+     élève. La moyenne d'une matière pour un élève = moyenne de TOUS ses devoirs dans cette
+     matière (peu importe le type), donc automatiquement divisée par le nombre de devoirs
+     déjà faits. La moyenne générale = moyenne des moyennes de matières, PONDÉRÉE par le
+     coefficient de chaque matière — seules les matières où l'élève a déjà au moins un
+     devoir noté entrent dans le calcul. */
+  enregistrerNoteDevoir({eleveId, classe, matiereId, matiereNom, type, date, note, bareme, trimestre}){
+    const notes = DB.get(DB.KEYS.devoirNotes, []);
+    trimestre = trimestre || DB.TRIMESTRES[0];
+    // upsert : ressaisir le même devoir (élève + matière + type + date + trimestre) met à
+    // jour la note existante au lieu de la dupliquer.
+    const idx = notes.findIndex(n => n.eleveId===eleveId && n.matiereId===matiereId && n.type===type && n.date===date && (n.trimestre||DB.TRIMESTRES[0])===trimestre);
+    const rec = {
+      id: idx>-1 ? notes[idx].id : DB.uid('DVR'),
+      eleveId, classe, matiereId, matiere: matiereNom, type, date, trimestre,
+      note: Math.max(0, Number(note)||0),
+      bareme: Number(bareme)||20
+    };
+    if(idx>-1) notes[idx] = rec; else notes.push(rec);
+    DB.set(DB.KEYS.devoirNotes, notes);
+    return rec;
+  },
+  supprimerNoteDevoir(id){
+    const notes = DB.get(DB.KEYS.devoirNotes, []).filter(n=>n.id!==id);
+    DB.set(DB.KEYS.devoirNotes, notes);
+  },
+  /* Supprime TOUT un devoir (tous les élèves) — matière + type + date + trimestre d'une
+     classe donnée. */
+  supprimerDevoirEntier(classe, matiereId, type, date, trimestre){
+    trimestre = trimestre || DB.TRIMESTRES[0];
+    const notes = DB.get(DB.KEYS.devoirNotes, [])
+      .filter(n => !(n.classe===classe && n.matiereId===matiereId && n.type===type && n.date===date && (n.trimestre||DB.TRIMESTRES[0])===trimestre));
+    DB.set(DB.KEYS.devoirNotes, notes);
+  },
+  /* Moyenne d'un élève dans UNE matière POUR UN TRIMESTRE donné, ramenée sur 20 = moyenne
+     de tous ses devoirs de ce trimestre dans cette matière (chacun ramené sur 20 selon son
+     barème). Les anciennes notes sans trimestre enregistré comptent comme 1er Trimestre. */
+  moyenneMatiereEleve(eleveId, matiereId, trimestre){
+    trimestre = trimestre || DB.TRIMESTRES[0];
+    const notes = DB.get(DB.KEYS.devoirNotes, [])
+      .filter(n=>n.eleveId===eleveId && n.matiereId===matiereId && (n.trimestre||DB.TRIMESTRES[0])===trimestre);
+    if(!notes.length) return null;
+    const total = notes.reduce((s,n)=> s + (n.note / (n.bareme||20)) * 20, 0);
+    return {moyenne: total / notes.length, nbDevoirs: notes.length};
+  },
+  /* Détail de la moyenne d'une matière PAR TYPE de devoir (Devoir de Classe / Devoir de
+     Département / Composition) pour un élève et un trimestre donné — utilisé pour afficher
+     le détail dans le bulletin imprimable. Retourne {type: moyenne|null}. */
+  moyennesParTypeMatiereEleve(eleveId, matiereId, trimestre){
+    trimestre = trimestre || DB.TRIMESTRES[0];
+    const notes = DB.get(DB.KEYS.devoirNotes, [])
+      .filter(n=>n.eleveId===eleveId && n.matiereId===matiereId && (n.trimestre||DB.TRIMESTRES[0])===trimestre);
+    const parType = {};
+    DB.TYPES_DEVOIR.forEach(type=>{
+      const notesType = notes.filter(n=>n.type===type);
+      parType[type] = notesType.length
+        ? notesType.reduce((s,n)=> s + (n.note/(n.bareme||20))*20, 0) / notesType.length
+        : null;
+    });
+    return parType;
+  },
+  /* Moyenne générale d'un élève dans sa classe POUR UN TRIMESTRE donné = moyenne des
+     moyennes de matières de ce trimestre, pondérée par les coefficients — seules les
+     matières déjà notées ce trimestre comptent. */
+  moyenneGeneraleEleve(eleveId, classe, trimestre){
+    trimestre = trimestre || DB.TRIMESTRES[0];
+    const matieres = DB.matieresDeClasse(classe);
+    let sommePonderee = 0, sommeCoef = 0, nbMatieresNotees = 0;
+    matieres.forEach(m=>{
+      const r = DB.moyenneMatiereEleve(eleveId, m.id, trimestre);
+      if(r){
+        sommePonderee += r.moyenne * m.coefficient;
+        sommeCoef += m.coefficient;
+        nbMatieresNotees++;
+      }
+    });
+    return {
+      moyenne: sommeCoef ? (sommePonderee/sommeCoef) : null,
+      nbMatieresNotees, nbMatieresTotal: matieres.length
+    };
+  },
+  /* Classement complet d'une classe pour un trimestre donné : liste des élèves triés par
+     moyenne générale décroissante, avec rang et effectif — utilisé par la liste de classe,
+     l'écran de saisie du DE et les bulletins individuels, pour que le rang affiché soit
+     TOUJOURS identique partout. */
+  classementClasse(classe, trimestre){
+    trimestre = trimestre || DB.TRIMESTRES[0];
+    const eleves = DB.get(DB.KEYS.students, []).filter(s=>s.classe===classe)
+      .sort((a,b)=> (a.nom+a.prenom).localeCompare(b.nom+b.prenom));
+    const lignes = eleves.map(eleve=>{
+      const g = DB.moyenneGeneraleEleve(eleve.id, classe, trimestre);
+      return {eleve, moyenne: g.moyenne, nbMatieresNotees: g.nbMatieresNotees, nbMatieresTotal: g.nbMatieresTotal};
+    });
+    const classees = lignes.filter(l=>l.moyenne!==null).sort((a,b)=> b.moyenne - a.moyenne);
+    const nonClassees = lignes.filter(l=>l.moyenne===null);
+    const rangs = new Map();
+    classees.forEach((l,i)=> rangs.set(l.eleve.id, i+1));
+    const effectif = eleves.length;
+    return [...classees, ...nonClassees].map(l=> ({...l, rang: rangs.get(l.eleve.id) || null, effectif}));
   },
   logActivity(icon, text){
     const acts = DB.get(DB.KEYS.activities, []);
@@ -666,7 +881,7 @@ const DB = {
     }
     if(!localStorage.getItem(DB.KEYS.settings)){
       DB.set(DB.KEYS.settings, {
-        etablissement:'CEPEED School International',
+        etablissement:'',
         logo:'',
         annee:'2025-2026',
         modesPaiement:{especes:true, momo:true, orangeMoney:true, cheque:false, virement:true},
@@ -680,6 +895,15 @@ const DB = {
     }
     if(!localStorage.getItem(DB.KEYS.notes)){
       DB.set(DB.KEYS.notes, []);
+    }
+    if(!localStorage.getItem(DB.KEYS.cantineConso)){
+      DB.set(DB.KEYS.cantineConso, []);
+    }
+    if(!localStorage.getItem(DB.KEYS.matieresClasse)){
+      DB.set(DB.KEYS.matieresClasse, {});
+    }
+    if(!localStorage.getItem(DB.KEYS.devoirNotes)){
+      DB.set(DB.KEYS.devoirNotes, []);
     }
   }
 };
@@ -710,6 +934,14 @@ DB.migrerFraisMensuel();
 DB.migrerDateEcheanceMensuelle();
 DB.nettoyerEcheancesAvantInscription();
 DB.assurerEcheancesMensuellesTous();
+
+/* Types de devoirs reconnus par le module Notes du DE (Directeur des Études) */
+DB.TYPES_DEVOIR = ['Devoir de Classe', 'Devoir de Département', 'Composition'];
+
+/* Trimestres reconnus par le module Notes du DE. Chaque devoir est rattaché à UN
+   trimestre — les moyennes, classements et bulletins sont toujours calculés pour
+   un trimestre donné (jamais mélangés entre trimestres). */
+DB.TRIMESTRES = ['1er Trimestre', '2e Trimestre', '3e Trimestre'];
 
 /* ---------------- CODE QR DE VÉRIFICATION (reçus & bulletins) ----------------
    Rendu SVG local (js/qrcode.js, sans dépendance réseau). Retourne une chaîne
@@ -762,6 +994,25 @@ DB.qrBulletinTexte = function(rec, el, resume){
     'Période: ' + (resume && resume.periode || '-'),
     'Résultat: ' + (resume && resume.total || '-'),
     'Place: ' + ((rec.place || '-') + ' / ' + (rec.effectif || '-'))
+  ];
+  return lignes.join('\n');
+};
+
+/* Construit le texte lisible encodé dans le QR d'un BULLETIN DE NOTES DU DE (système
+   devoirs/trimestres — distinct du bulletin semestriel classique). */
+DB.qrBulletinDETexte = function(el, classe, trimestre, resume){
+  const settings = DB.get(DB.KEYS.settings, {});
+  const nomEtablissement = (settings.etablissement || 'Établissement Scolaire').toUpperCase();
+  const lignes = [
+    nomEtablissement,
+    'BULLETIN DE NOTES',
+    'Élève: ' + ((el && (el.prenom+' '+el.nom)) || '-'),
+    'Matricule: ' + ((el && el.id) || '-'),
+    'Classe: ' + (classe || '-'),
+    'Année scolaire: ' + (settings.annee || '2025-2026'),
+    'Période: ' + (trimestre || '-'),
+    'Moyenne générale: ' + (resume && resume.moyenne || '-'),
+    'Rang: ' + (resume && resume.rang || '-')
   ];
   return lignes.join('\n');
 };

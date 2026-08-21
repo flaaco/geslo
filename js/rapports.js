@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
 
   renderRapportsStats();
   renderRapportsHistory();
+  renderEncaissements();
 
   const settings = DB.get(DB.KEYS.settings, {});
   if(settings.rapportPlanifie){
@@ -17,8 +18,80 @@ document.addEventListener('DOMContentLoaded', ()=>{
   // dès qu'un paiement, une dépense (ex: génération de paie) ou une échéance change,
   // sans que l'utilisateur ait besoin de recharger la page.
   window.addEventListener('cepeed:data-changed', renderRapportsStats);
+  window.addEventListener('cepeed:data-changed', renderEncaissements);
   window.addEventListener('storage', renderRapportsStats);
+  window.addEventListener('storage', renderEncaissements);
 });
+
+/* ---------------- SYNTHÈSE DES ENCAISSEMENTS PAR TYPE (jour / semaine / mois / personnalisé) ---------------- */
+let periodeEncaissementsActuelle = 'jour';
+
+function getPeriodeDates(periode){
+  const iso = d => d.toISOString().slice(0,10);
+  const today = new Date();
+  if(periode === 'jour'){
+    return {debut: iso(today), fin: iso(today), label: "Aujourd'hui — " + today.toLocaleDateString('fr-FR')};
+  }
+  if(periode === 'semaine'){
+    const jour = today.getDay(); // 0=dimanche .. 6=samedi
+    const decalageLundi = (jour === 0) ? -6 : (1 - jour);
+    const lundi = new Date(today); lundi.setDate(today.getDate() + decalageLundi);
+    const dimanche = new Date(lundi); dimanche.setDate(lundi.getDate() + 6);
+    return {debut: iso(lundi), fin: iso(dimanche), label: `Semaine du ${lundi.toLocaleDateString('fr-FR')} au ${dimanche.toLocaleDateString('fr-FR')}`};
+  }
+  if(periode === 'mois'){
+    const premier = new Date(today.getFullYear(), today.getMonth(), 1);
+    const dernier = new Date(today.getFullYear(), today.getMonth()+1, 0);
+    const label = today.toLocaleDateString('fr-FR', {month:'long', year:'numeric'});
+    return {debut: iso(premier), fin: iso(dernier), label: label.charAt(0).toUpperCase() + label.slice(1)};
+  }
+  // Personnalisé
+  const debut = document.getElementById('encDebut').value;
+  const fin = document.getElementById('encFin').value;
+  const label = (debut && fin)
+    ? `Du ${new Date(debut+'T00:00:00').toLocaleDateString('fr-FR')} au ${new Date(fin+'T00:00:00').toLocaleDateString('fr-FR')}`
+    : 'Choisissez une période personnalisée';
+  return {debut, fin, label};
+}
+
+function selectPeriodeEncaissements(periode){
+  periodeEncaissementsActuelle = periode;
+  document.querySelectorAll('.periode-btn').forEach(b=>{
+    const actif = b.dataset.periode === periode;
+    b.classList.toggle('btn-dark', actif);
+    b.classList.toggle('btn-outline', !actif);
+    b.classList.toggle('active', actif);
+  });
+  document.getElementById('encCustomDates').style.display = (periode === 'perso') ? 'flex' : 'none';
+  renderEncaissements();
+}
+
+function renderEncaissements(){
+  const {debut, fin, label} = getPeriodeDates(periodeEncaissementsActuelle);
+  document.getElementById('encPeriodeLabel').textContent = label;
+  window.__encPeriode = {debut, fin, label};
+
+  if(!debut || !fin){
+    document.getElementById('encTableBody').innerHTML = '<tr><td colspan="3" class="empty-state">Choisissez une date de début et de fin</td></tr>';
+    document.getElementById('encTotal').textContent = DB.fmtFCFA(0);
+    document.getElementById('encNbPaiements').textContent = '0';
+    return;
+  }
+
+  const data = DB.encaissementsParType(debut, fin);
+  document.getElementById('encTableBody').innerHTML = data.lignes.length
+    ? data.lignes.map(l=>`<tr><td>${l.type}</td><td class="num">${l.nb}</td><td class="num">${DB.fmtFCFA(l.montant)}</td></tr>`).join('')
+    : '<tr><td colspan="3" class="empty-state">Aucun encaissement sur cette période</td></tr>';
+  document.getElementById('encTotal').textContent = DB.fmtFCFA(data.total);
+  document.getElementById('encNbPaiements').textContent = data.nbPaiements;
+}
+
+function genererPDFEncaissements(){
+  const {debut, fin, label} = window.__encPeriode || getPeriodeDates(periodeEncaissementsActuelle);
+  if(!debut || !fin){ toast('⚠ Choisissez une période valide'); return; }
+  logReport('Synthèse des Encaissements');
+  window.open(`report.html?type=${encodeURIComponent('Synthèse des Encaissements')}&debut=${debut}&fin=${fin}&label=${encodeURIComponent(label)}`, '_blank');
+}
 
 function renderRapportsStats(){
   const students = DB.get(DB.KEYS.students, []);
@@ -124,7 +197,7 @@ function exporterExcel(){
     rows.push(['Nombre de Paiements Enregistrés', payments.length]);
   }
 
-  downloadCSV(`CEPEED-${type.replace(/\s+/g,'_')}-${new Date().toISOString().slice(0,10)}.csv`, rows);
+  downloadCSV(`${DB.matriculePrefix()}-${type.replace(/\s+/g,'_')}-${new Date().toISOString().slice(0,10)}.csv`, rows);
   logReport(type);
   toast('✔ Export Excel (CSV) téléchargé');
 }
