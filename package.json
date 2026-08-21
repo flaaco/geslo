@@ -24,7 +24,6 @@
   "build": {
     "appId": "com.geslo.app",
     "productName": "GESLO",
-    "publish": null,
     "files": [
       "**/*",
       "!node_modules",

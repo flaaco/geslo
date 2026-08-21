@@ -2,21 +2,22 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<title>Certificat de Scolarité — CEPEED</title>
+<title>Bulletin de Notes — CEPEED</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" href="css/style.css">
 <style>body{background:var(--bg);}</style>
 </head>
 <body>
   <div class="doc-toolbar no-print">
-    <a class="btn btn-outline" href="inscription.html">← Retour</a>
-    <button class="btn btn-primary" onclick="window.print()">🖨 Imprimer / Enregistrer en PDF</button>
+    <a class="btn btn-outline" href="notes-de.html">← Retour</a>
+    <button class="btn btn-primary" onclick="window.print()">🖨 Imprimer / Exporter en PDF</button>
   </div>
 
-  <div class="doc-page" id="certifPage"></div>
+  <div id="bulletinsWrap"></div>
 
 <script src="js/data.js"></script>
 <script src="js/branding.js"></script>
-<script src="js/certificat.js"></script>
+<script src="js/qrcode.js"></script>
+<script src="js/bulletin-de.js"></script>
 </body>
 </html>

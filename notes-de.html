@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Notes & Moyennes (DE) — CEPEED</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="app-shell">
+  <nav class="sidebar" id="sidebar"></nav>
+  <div class="main">
+    <header class="topbar" id="topbar"></header>
+    <main class="content">
+      <div class="content-header">
+        <h1 class="page-title">NOTES &amp; MOYENNES — DIRECTEUR DES ÉTUDES</h1>
+        <p class="page-subtitle">Saisissez les notes de devoir (Devoir de Classe, Devoir de Département, Composition) de chaque matière — la moyenne de chaque élève se calcule automatiquement selon les coefficients de la classe.</p>
+      </div>
+
+      <div class="card mb-16">
+        <div class="form-row">
+          <div class="form-group" style="max-width:360px;">
+            <label>Classe</label>
+            <select id="deClasse" onchange="onClasseChange()"></select>
+          </div>
+          <div class="form-group" style="max-width:220px;">
+            <label>Trimestre</label>
+            <select id="deTrimestre" onchange="onClasseChange()"></select>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-2">
+        <div class="card">
+          <div class="section-title">Matières &amp; Coefficients de cette Classe</div>
+          <div class="table-wrap" style="max-height:280px;overflow-y:auto;">
+            <table>
+              <thead><tr><th>Matière</th><th style="text-align:right;">Coefficient</th><th></th></tr></thead>
+              <tbody id="matieresBody"></tbody>
+            </table>
+          </div>
+          <div class="form-row mt-16">
+            <div class="form-group"><label>Nouvelle Matière</label><input type="text" id="nMatiere" placeholder="Ex: Mathématiques"></div>
+            <div class="form-group" style="max-width:120px;"><label>Coefficient</label><input type="number" id="nCoef" min="1" value="1"></div>
+          </div>
+          <button class="btn btn-primary btn-block" onclick="ajouterMatiere()"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus-icon lucide-plus"><path d="M5 12h14"/><path d="M12 5v14"/></svg> Ajouter cette Matière à la Classe</button>
+        </div>
+
+        <div class="card">
+          <div class="section-title">Saisir les Notes d'un Devoir</div>
+          <div class="form-row">
+            <div class="form-group"><label>Matière</label><select id="dMatiere" onchange="chargerDevoirExistant()"></select></div>
+            <div class="form-group"><label>Type de Devoir</label><select id="dType" onchange="chargerDevoirExistant()"></select></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>Date du Devoir</label><input type="date" id="dDate" onchange="chargerDevoirExistant()"></div>
+            <div class="form-group" style="max-width:120px;"><label>Barème</label><input type="number" id="dBareme" min="1" value="20"></div>
+          </div>
+          <div class="table-wrap" style="max-height:280px;overflow-y:auto;">
+            <table>
+              <thead><tr><th>Élève</th><th style="text-align:right;">Note</th></tr></thead>
+              <tbody id="saisieBody"></tbody>
+            </table>
+          </div>
+          <div class="flex gap-8 mt-16">
+            <button class="btn btn-primary" style="flex:1;" onclick="enregistrerDevoir()"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check-icon lucide-check"><path d="M20 6 9 17l-5-5"/></svg> Enregistrer les Notes</button>
+            <button class="btn btn-danger" id="btnSuppDevoir" style="display:none;" onclick="supprimerDevoirActuel()"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash-icon lucide-trash"><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card mt-16">
+        <div class="flex-between" style="flex-wrap:wrap;gap:12px;">
+          <div class="section-title" style="margin:0;">Moyennes de la Classe — <span id="moyennesTrimestreLabel"></span></div>
+          <button class="btn btn-outline btn-sm" onclick="imprimerReleve()"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-save-icon lucide-save"><path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7"/><path d="M7 3v4a1 1 0 0 0 1 1h7"/></svg> Imprimer le Relevé de la Classe</button>
+        </div>
+        <div class="table-wrap mt-16">
+          <table>
+            <thead><tr id="moyennesHead"></tr></thead>
+            <tbody id="moyennesBody"></tbody>
+          </table>
+        </div>
+        <div class="small text-muted mt-16">La moyenne de chaque matière = moyenne des devoirs (Devoir de Classe, Devoir de Département, Composition) déjà notés dans cette matière POUR CE TRIMESTRE. La moyenne générale = moyenne des matières notées, pondérée par leur coefficient.</div>
+      </div>
+
+      <div class="card mt-16">
+        <div class="section-title">Bulletins des Élèves</div>
+        <div class="small text-muted mb-16">Bulletin détaillé par élève : moyenne par matière, avec le détail Devoir de Classe / Devoir de Département / Composition, et la moyenne générale du trimestre avec le rang.</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Élève</label>
+            <select id="deEleve"></select>
+          </div>
+        </div>
+        <div class="flex gap-8 mt-16" style="flex-wrap:wrap;">
+          <button class="btn btn-primary" onclick="imprimerBulletinEleve()"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-save-icon lucide-save"><path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7"/><path d="M7 3v4a1 1 0 0 0 1 1h7"/></svg> Imprimer le Bulletin de cet Élève</button>
+          <button class="btn btn-outline" onclick="imprimerBulletinsClasse()"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-save-icon lucide-save"><path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7"/><path d="M7 3v4a1 1 0 0 0 1 1h7"/></svg> Imprimer les Bulletins de Toute la Classe</button>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<script src="js/data.js"></script>
+<script src="js/branding.js"></script>
+<script src="js/sidebar.js"></script>
+<script src="js/notes-de.js"></script>
+</body>
+</html>

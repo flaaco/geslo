@@ -41,7 +41,7 @@
             <div class="form-group" style="margin-bottom:8px;">
               <label>Rechercher un élève (nom ou matricule)</label>
               <div class="flex gap-8">
-                <input type="text" id="searchPayEleve" placeholder="Ex: Ngoma ou CPI-25-4801" oninput="filterEleve(this.value)" onkeydown="if(event.key==='Enter') lockEleve();">
+                <input type="text" id="searchPayEleve" placeholder="Ex: Ngoma ou matricule élève" oninput="filterEleve(this.value)" onkeydown="if(event.key==='Enter') lockEleve();">
                 <button class="btn btn-primary" onclick="lockEleve()">Ouvrir</button>
               </div>
               <div id="eleveResults" class="small mt-8"></div>
@@ -62,6 +62,7 @@
 </div>
 
 <script src="js/data.js"></script>
+<script src="js/branding.js"></script>
 <script src="js/sidebar.js"></script>
 <script src="js/paiements.js"></script>
 </body>
